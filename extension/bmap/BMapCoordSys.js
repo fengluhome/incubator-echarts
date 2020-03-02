@@ -224,8 +224,19 @@ BMapCoordSys.create = function (ecModel, api) {
     var zoom = bmapModel.get('zoom');
 
     if (center && zoom) {
-      var pt = new BMap.Point(center[0], center[1]);
-      bmap.centerAndZoom(pt, zoom);
+      var mapCenter = bmap.getCenter();
+      var mapZoom = bmap.getZoom();
+      var isUpdateCenter = mapCenter[0] != center[0] || mapCenter[1] != center[1];
+      var isUpdateZoom = mapZoom != zoom;
+
+      if (isUpdateCenter && isUpdateZoom) {
+        var pt = new BMap.Point(center[0], center[1]);
+        bmap.centerAndZoom(pt, zoom);
+      } else if (isUpdateCenter) {
+        bmap.setCenter(center);
+      } else if (isUpdateZoom) {
+        bmap.setZoom(zoom);
+      }
     }
 
     bmapCoordSys = new BMapCoordSys(bmap, api);

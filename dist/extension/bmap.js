@@ -196,9 +196,20 @@ BMapCoordSys.create = function (ecModel, api) {
         var center = bmapModel.get('center');
         var zoom = bmapModel.get('zoom');
         if (center && zoom) {
-            var pt = new BMap.Point(center[0], center[1]);
-            bmap.centerAndZoom(pt, zoom);
-        }
+            var mapCenter = bmap.getCenter();
+            var mapZoom = bmap.getZoom();
+            var isUpdateCenter = mapCenter[0] != center[0] || mapCenter[1] != center[1];
+            var isUpdateZoom = mapZoom != zoom;
+
+            if (isUpdateCenter && isUpdateZoom) {
+              var pt = new BMap.Point(center[0], center[1]);
+              bmap.centerAndZoom(pt, zoom);
+            } else if (isUpdateCenter) {
+              bmap.setCenter(center);
+            } else if (isUpdateZoom) {
+              bmap.setZoom(zoom);
+            }
+          }
 
         bmapCoordSys = new BMapCoordSys(bmap, api);
         bmapCoordSys.setMapOffset(bmapModel.__mapOffset || [0, 0]);
@@ -359,7 +370,7 @@ echarts.extendComponentView({
 
         var newMapStyle = bMapModel.get('mapStyle') || {};
         // FIXME, Not use JSON methods
-        var mapStyleStr = JSON.stringify(newMapStyle);
+        var mapStyleStr = JSON.stringify(newMapStyle.styleJson);
         if (JSON.stringify(originalStyle) !== mapStyleStr) {
             // FIXME May have blank tile when dragging if setMapStyle
             if (Object.keys(newMapStyle).length) {
